@@ -1,0 +1,64 @@
+﻿@model IEnumerable<StudentApplication.Models.Excel.Student>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="container">
+    <a class="btn btn-sm btn-primary m-2" asp-action="ImportExcelFile" asp-controller="Excel"> Upload File</a>
+    <a class="btn btn-sm btn-warning m-2" asp-action="ExportExcel" asp-controller="Excel"> Export File</a>
+    <p class="text-center text-success font-weight-bold">@TempData["message"]</p>
+
+
+
+
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-hover table-striped" width="100%" id="dataTableData">
+                <thead class="thead-dark">
+                    <tr>
+                        <th colspan="12" class="heading"><span style="float:right;">Student Data</span></th>
+                    </tr>
+                    <tr class="text-center">
+                        <th>Internal_Id</th>
+                        <th>ExternalStudentID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>DOB</th>
+                        <th>SSN</th>
+                        <th>Adddress</th>
+                        <th>City</th>
+                        <th>State</th>
+                        <th>Email</th>
+                        <th>MaritalStatus</th>
+
+                    </tr>
+                </thead>
+
+                @foreach (var d in Model)
+                {
+                    <tr class="text-center">
+                        <th>@d.Id</th>
+                        <td>@d.ExternalStudentID</td>
+                        <td>@d.FirstName</td>
+                        <td>@d.LastName</td>
+                        <td>@d.DOB</td>
+                        <td>@d.SSN</td>
+                        <td>@d.Adddress</td>
+                        <td>@d.City</td>
+                        <td>@d.State</td>
+                        <td>@d.Email</td>
+                        <td>@d.MaritalStatus</td>
+                    </tr>
+                }
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+@section scripts {
+
+    <script src="~/js/datatable_file.js"></script>
+
+}
