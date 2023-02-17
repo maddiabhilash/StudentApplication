@@ -156,7 +156,7 @@ namespace StudentApplication.Controllers.Excel
 
                             // Check for duplicates in the data table
                             var duplicates = dt.AsEnumerable()
-                            .GroupBy(r => new { col1 = r["ExternalStudentID"], col2 = r["FirstName"], col3 = r["LastName"] })
+                            .GroupBy(r => new { col1 = r["FirstName"], col2 = r["LastName"], col3 = r["DOB"], col4 = r["SSN"] })
                             .Where(g => g.Count() > 1)
                             .Select(g => g.First());
 
