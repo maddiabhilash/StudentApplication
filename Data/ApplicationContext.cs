@@ -12,7 +12,6 @@ namespace StudentApplication.Data
 
         public DbSet<Customer> Customers { get; set; }
 
-        public IList<Dupcheck> Dupchecks { get; set; }
 
         public DbSet<Student> Students { get; set; }
 

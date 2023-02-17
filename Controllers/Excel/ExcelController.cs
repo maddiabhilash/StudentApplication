@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Newtonsoft.Json;
 using StudentApplication.Data;
 using StudentApplication.Models.Excel;
 using System.Configuration;
@@ -23,6 +24,7 @@ namespace StudentApplication.Controllers.Excel
             this.configuration = configuration;
             this.context = context;
         }
+
         public IActionResult Index()
         {
             var data = context.Students.Take(50).ToList();
@@ -33,32 +35,64 @@ namespace StudentApplication.Controllers.Excel
         {
             public string Data { get; set; }
         }
-        public IActionResult DisplayDuplicate()
+      /*  public IActionResult DisplayDuplicate()
         {
             string data = TempData["Data"] as string;
             DataViewModel model = new DataViewModel();
             model.Data = data;
 
             return View(model);
-        }
+        }*/
 
+     
 
 
 
         //http GET
         public IActionResult ImportExcelFile()
         {
+            string data = TempData["Data"] as string;
+            DataViewModel model = new DataViewModel();
+            model.Data = data;
 
+            return View(model);
 
             return View();
         }
-        /* public IActionResult DisplayDuplicate()
-         {
-             var data1 = context.Dupchecks.Take(50).ToList();
+        public IActionResult DisplayDuplicate()
+        {
+            var json = TempData["Data"] as string;
+            if (json != null)
+            {
+                var rows = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(json);
+                var dt = new DataTable();
+                foreach (var col in rows.First())
+                {
+                    dt.Columns.Add(col.Key);
+                }
+                foreach (var row in rows)
+                {
+                    var dataRow = dt.NewRow();
+                    foreach (var col in row)
+                    {
+                        dataRow[col.Key] = col.Value;
+                    }
+                    dt.Rows.Add(dataRow);
+                }
+                var viewModel = new DuplicateRecordsViewModel
+                {
+                    DuplicateRecords = dt
+                };
+                return View(viewModel);
+            }
+            else
+            {
+                // Handle the case where there is no data in TempData
+                return RedirectToAction("ImportExcelFile");
+            }
+        }
 
-             return View(data1);
 
-         }*/
         [HttpPost]
         public IActionResult ImportExcelFile(IFormFile formFile)
         {
@@ -171,12 +205,22 @@ namespace StudentApplication.Controllers.Excel
                                             else
                                             {
                                                 dtDuplicates.ImportRow(row);
-                                                //Duplicate Check
-                                                Console.WriteLine("Duplicate Records:");
-                                                StringBuilder sb = new StringBuilder();
-                                                foreach (DataRow dp in dtDuplicates.Rows)
-                                                {
-                                                    sb.AppendLine("ExternalStudentID: " + dp["ExternalStudentID"] +
+                                                TempData["message"] = "Duplicate Data Present";
+                                            }
+                                        }
+
+                                        if (dtNew.Rows.Count > 0)
+                                        {
+                                            sqlBulkCopy.WriteToServer(dtNew);
+                                        }
+
+                                        /*  if (dtDuplicates.Rows.Count > 0)
+                                          {
+                                              Console.WriteLine("Duplicate Records:");
+                                              StringBuilder sb = new StringBuilder();
+                                              foreach (DataRow dp in dtDuplicates.Rows)
+                                              {
+                                                  sb.AppendLine("ExternalStudentID: " + dp["ExternalStudentID"] +
                                                                   " FirstName: " + dp["FirstName"] +
                                                                   " LastName: " + dp["LastName"] +
                                                                   " DOB: " + dp["DOB"] +
@@ -186,22 +230,36 @@ namespace StudentApplication.Controllers.Excel
                                                                   " State: " + dp["State"] +
                                                                   " Email: " + dp["Email"] +
                                                                   " MaritalStatus: " + dp["MaritalStatus"]);
+                                              }
+                                              TempData["Data"] = sb.ToString();
+                                              return RedirectToAction("ImportExcelFile");
+                                          }*/
+
+                                        if (dtDuplicates.Rows.Count > 0)
+                                        {
+                                            Console.WriteLine("Duplicate Records:");
+                                            var rows = new List<Dictionary<string, object>>();
+                                            foreach (DataRow row in dtDuplicates.Rows)
+                                            {
+                                                var dict = new Dictionary<string, object>();
+                                                foreach (DataColumn col in dtDuplicates.Columns)
+                                                {
+                                                    dict[col.ColumnName] = row[col];
                                                 }
-                                                TempData["Data"] = sb.ToString();
-                                                return RedirectToAction("DisplayDuplicate");
-
-
+                                                rows.Add(dict);
                                             }
-
-
+                                            var json = JsonConvert.SerializeObject(rows);
+                                            TempData["Data"] = json;
+                                            return RedirectToAction("DisplayDuplicate");
                                         }
 
-                                        sqlBulkCopy.WriteToServer(dtNew);
+
+
+
                                         con.Close();
-
-
                                     }
                                 }
+
 
                             }
 

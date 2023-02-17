@@ -1,3 +1,36 @@
-﻿<div>
-    @Model.Data
-</div>
+﻿@using System.Data;
+@model StudentApplication.Models.Excel.DuplicateRecordsViewModel
+
+<a href="@Url.Action("Index", "")" class="btn btn-primary">Back to Home</a>
+
+<p class="text-center text-danger font-weight-bold">@TempData["message"]</p>
+
+<table class="table table-hover table-striped" width="100%" id="dataTableData">
+    <thead class="thead-dark">
+        <tr>
+            <th colspan="12" class="heading"><span style="float:right;">Student Data</span></th>
+        </tr>
+        @foreach (DataColumn column in Model.DuplicateRecords.Columns)
+        {
+        <th>@column.ColumnName</th>
+        }
+    </tr>
+    </thead>
+    <tbody>
+        @foreach (DataRow row in Model.DuplicateRecords.Rows)
+        {
+            <tr>
+                @foreach (DataColumn column in Model.DuplicateRecords.Columns)
+                {
+                    <td>@row[column]</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts {
+
+        <script src="~/js/datatable_file.js"></script>
+
+}
